@@ -47,7 +47,7 @@ export default function PasseiosScreen() {
           />
 
           {/* BANNER */}
-          <div className="relative">
+          <div className="relative ">
             <Image
                 source={require("../assets/passeios/hero.png")}
                 resizeMode="cover"
@@ -130,13 +130,13 @@ export default function PasseiosScreen() {
           {/* TEXTO EXPLICATIVO */}
           <View className="mt-5 w-full px-1">
             <Text className="text-[16px] leading-[21px] text-black">
-              Para ajudar você a tomar decisões com mais{"\n"}
+              Para ajudar você a tomar decisões com mais
               confiança, reunimos informações de{" "}
               <Text className="font-extrabold">
                 fontes oficiais e dados públicos
               </Text>{" "}
-              sobre segurança,{"\n"}
-              transporte, comércio/lazer e custo de vida,{"\n"}
+              sobre segurança,
+              transporte, comércio/lazer e custo de vida,
               juntamente dos{" "}
               <Text className="font-extrabold">
                 relatos de moradores reais!
@@ -144,15 +144,15 @@ export default function PasseiosScreen() {
             </Text>
 
             <Text className="mt-3 text-[16px] leading-[21px] text-black">
-              Navegue por dados destrinchados e fáceis de{"\n"}
-              entender, e sinta-se com repertório sobre o{"\n"}
+              Navegue por dados destrinchados e fáceis de
+              entender, e sinta-se com repertório sobre o
               contexto local das diferentes regiões do Brasil.
             </Text>
           </View>
 
           {/* TÍTULO DO GUIA */}
           <Text className="mt-4 w-full text-[31px] font-extrabold leading-[32px] text-black">
-            Morando sozinho pela{"\n"}
+            Morando sozinho pela
             primeira vez?
           </Text>
 
@@ -198,10 +198,10 @@ export default function PasseiosScreen() {
 
           {/* TEXTO DO GUIA */}
           <Text className="mt-4 w-full px-1 text-[16px] leading-[21px] text-black">
-            Nosso guia reúne dicas práticas, checklists,{"\n"}
-            explicações de termos comuns do mercado{"\n"}
-            imobiliário e orientações para ajudar você a se{"\n"}
-            preparar com mais segurança e tranquilidade{"\n"}
+            Nosso guia reúne dicas práticas, checklists,
+            explicações de termos comuns do mercado
+            imobiliário e orientações para ajudar você a se
+            preparar com mais segurança e tranquilidade
             para essa nova fase.
           </Text>
         </View>
