@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, Stack } from "expo-router";
 import {
   Image,
   Pressable,
@@ -30,13 +30,15 @@ const categories = [
 
 export default function PasseiosScreen() {
   return (
-    <View className="flex-1 bg-white">
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 110,
-        }}
-      >
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <View className="flex-1 bg-white">
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingBottom: 110,
+          }}
+        >
         <View className="items-center px-5 pt-10">
 
           {/* LOGO */}
@@ -205,8 +207,9 @@ export default function PasseiosScreen() {
             para essa nova fase.
           </Text>
         </View>
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </>
   );
 }
 
