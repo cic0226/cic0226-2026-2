@@ -1,3 +1,4 @@
+import { Stack } from "expo-router";
 import {
     Image,
     Pressable,
@@ -10,69 +11,71 @@ import {
 
 export default function LoginScreen() {
   return (
-    <ScrollView
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <ScrollView
+      style={styles.container}
+          contentContainerStyle={styles.scrollContent}>
+            
+          {/*as imagens de cadastro sao as mesmas de login*/}
+          <Image source={require("../assets/login/arteCabecalho.png")}style={styles.headerImage}/>
         
-    style={styles.container}
-        contentContainerStyle={styles.scrollContent}>
-          
-        {/*as imagens de cadastro sao as mesmas de login*/}
-        <Image source={require("../assets/login/arteCabecalho.png")}style={styles.headerImage}/>
+          <View style={styles.content}>
       
-        <View style={styles.content}>
-    
-        
-            <Text style={styles.title}>Comece agora com o MaPeei!</Text>
-            
-            <Text style={styles.label}>Nome</Text>
+          
+              <Text style={styles.title}>Comece agora com o MaPeei!</Text>
+              
+              <Text style={styles.label}>Nome</Text>
 
-            <TextInput style={styles.input} placeholder="Digite seu nome" />
+              <TextInput style={styles.input} placeholder="Digite seu nome" />
 
-            <Text style={styles.label}>E-mail</Text>
-            
-            <TextInput style={styles.input} placeholder="Digite seu e-mail" />
+              <Text style={styles.label}>E-mail</Text>
+              
+              <TextInput style={styles.input} placeholder="Digite seu e-mail" />
 
-            <Text style={styles.label}>Senha</Text>
+              <Text style={styles.label}>Senha</Text>
 
-            <TextInput style={styles.input}placeholder="Digite sua senha"secureTextEntry/>
+              <TextInput style={styles.input}placeholder="Digite sua senha"secureTextEntry/>
 
 
-            <View style={styles.termsCheckContainer}>
-            <Pressable style={styles.checkbox} />
-            <Text style={styles.rememberText}>Li e concordo com os termos de uso</Text>
-            </View>
+              <View style={styles.termsCheckContainer}>
+              <Pressable style={styles.checkbox} />
+              <Text style={styles.rememberText}>Li e concordo com os termos de uso</Text>
+              </View>
 
-            <Pressable style={styles.mainButton}>
-            <Text style={styles.mainButtonText}>Inscrever-se</Text>
-            </Pressable>
+              <Pressable style={styles.mainButton}>
+              <Text style={styles.mainButtonText}>Inscrever-se</Text>
+              </Pressable>
 
-            <Text style={styles.orText}>Ou</Text>
+              <Text style={styles.orText}>Ou</Text>
 
-            {/* Botão Apple */}
-            <Pressable style={styles.socialButton}>
-            <Text style={styles.socialIcon}></Text>
-            <Text style={styles.socialButtonText}>Inscreva-se com Apple</Text>
-            </Pressable>
+              {/* Botão Apple */}
+              <Pressable style={styles.socialButton}>
+              <Text style={styles.socialIcon}></Text>
+              <Text style={styles.socialButtonText}>Inscreva-se com Apple</Text>
+              </Pressable>
 
-            {/* Botão Google */}
-            <Pressable style={styles.socialButton}>
-            <Text style={styles.googleIcon}>G</Text>
-            <Text style={styles.socialButtonText}>Inscreva-se com Google</Text>
-            </Pressable>
-            
-            
-            <View style={styles.aredyAccountContainer}>
-                <Text style={styles.aredyAccountText}>Já possui uma conta?</Text>
-                
-                <Pressable>
-                    <Text style={styles.loginLink}>Entre</Text>
-                </Pressable>
-            </View>
+              {/* Botão Google */}
+              <Pressable style={styles.socialButton}>
+              <Text style={styles.googleIcon}>G</Text>
+              <Text style={styles.socialButtonText}>Inscreva-se com Google</Text>
+              </Pressable>
+              
+              
+              <View style={styles.aredyAccountContainer}>
+                  <Text style={styles.aredyAccountText}>Já possui uma conta?</Text>
+                  
+                  <Pressable>
+                      <Text style={styles.loginLink}>Entre</Text>
+                  </Pressable>
+              </View>
 
-        </View>
-        
-        <Image source={require("../assets/login/logoMapeei.png")}style={styles.logoContainer}resizeMode="contain"/>
+          </View>
+          
+          <Image source={require("../assets/login/logoMapeei.png")}style={styles.logoContainer}resizeMode="contain"/>
 
-    </ScrollView>
+      </ScrollView>
+    </>
   );
 }
 

@@ -1,3 +1,4 @@
+import { Stack } from "expo-router";
 import {
     Image,
     Pressable,
@@ -10,74 +11,77 @@ import {
 
 export default function LoginScreen() {
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}>
+          
+        <Image source={require("../assets/login/arteCabecalho.png")}style={styles.headerImage}/>
         
-      <Image source={require("../assets/login/arteCabecalho.png")}style={styles.headerImage}/>
-      
 
-      <View style={styles.content}>
-        
-        
-        
-        <Text style={styles.title}>Bem-vindo(a) de volta!</Text>
-        
-        <Text style={styles.subtitle}> Entre com suas credenciais para acessar sua conta.</Text>
+        <View style={styles.content}>
+          
+          
+          
+          <Text style={styles.title}>Bem-vindo(a) de volta!</Text>
+          
+          <Text style={styles.subtitle}> Entre com suas credenciais para acessar sua conta.</Text>
 
-        <Text style={styles.label}>E-mail</Text>
-        
-        <TextInput style={styles.input} placeholder="Digite seu e-mail" />
+          <Text style={styles.label}>E-mail</Text>
+          
+          <TextInput style={styles.input} placeholder="Digite seu e-mail" />
 
-        <Text style={styles.label}>Senha</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Digite sua senha"
-          secureTextEntry
-        />
+          <Text style={styles.label}>Senha</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Digite sua senha"
+            secureTextEntry
+          />
 
-        <Pressable>
-          <Text style={styles.forgotPassword}>Esqueceu sua senha?</Text>
-        </Pressable>
-
-        <View style={styles.rememberContainer}>
-          <Pressable style={styles.checkbox} />
-          <Text style={styles.rememberText}>Lembrar de mim</Text>
-        </View>
-
-        <Pressable style={styles.mainButton}>
-          <Text style={styles.mainButtonText}>Login</Text>
-        </Pressable>
-
-        <Text style={styles.orText}>Ou</Text>
-
-        {/* Botão Apple */}
-        <Pressable style={styles.socialButton}>
-          <Text style={styles.socialIcon}></Text>
-          <Text style={styles.socialButtonText}>Inscreva-se com Apple</Text>
-        </Pressable>
-
-        {/* Botão Google */}
-        <Pressable style={styles.socialButton}>
-          <Text style={styles.googleIcon}>G</Text>
-          <Text style={styles.socialButtonText}>Inscreva-se com Google</Text>
-        </Pressable>
-
-        <View style={styles.createAccountContainer}>
-          <Text style={styles.createAccountText}>Não tem uma conta?</Text>
           <Pressable>
-            <Text style={styles.createAccountLink}>Crie agora</Text>
+            <Text style={styles.forgotPassword}>Esqueceu sua senha?</Text>
           </Pressable>
+
+          <View style={styles.rememberContainer}>
+            <Pressable style={styles.checkbox} />
+            <Text style={styles.rememberText}>Lembrar de mim</Text>
+          </View>
+
+          <Pressable style={styles.mainButton}>
+            <Text style={styles.mainButtonText}>Login</Text>
+          </Pressable>
+
+          <Text style={styles.orText}>Ou</Text>
+
+          {/* Botão Apple */}
+          <Pressable style={styles.socialButton}>
+            <Text style={styles.socialIcon}></Text>
+            <Text style={styles.socialButtonText}>Inscreva-se com Apple</Text>
+          </Pressable>
+
+          {/* Botão Google */}
+          <Pressable style={styles.socialButton}>
+            <Text style={styles.googleIcon}>G</Text>
+            <Text style={styles.socialButtonText}>Inscreva-se com Google</Text>
+          </Pressable>
+
+          <View style={styles.createAccountContainer}>
+            <Text style={styles.createAccountText}>Não tem uma conta?</Text>
+            <Pressable>
+              <Text style={styles.createAccountLink}>Crie agora</Text>
+            </Pressable>
+          </View>
+
+          {/* Logo no rodapé - troque pelo caminho da sua logo real*/}
+
+          <Image source={require("../assets/login/logoMapeei.png")}style={styles.logoContainer}resizeMode="contain"/>
+          
+
+      
         </View>
-
-        {/* Logo no rodapé - troque pelo caminho da sua logo real*/}
-
-        <Image source={require("../assets/login/logoMapeei.png")}style={styles.logoContainer}resizeMode="contain"/>
-        
-
-    
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </>
   );
 }
 
