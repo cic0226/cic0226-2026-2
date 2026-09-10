@@ -47,13 +47,13 @@ export default function LoginScreen() {
 
             <Text style={styles.orText}>Ou</Text>
 
-            {/* Botão Apple */}
+            {/* botao Apple */}
             <Pressable style={styles.socialButton}>
             <Text style={styles.socialIcon}></Text>
             <Text style={styles.socialButtonText}>Inscreva-se com Apple</Text>
             </Pressable>
 
-            {/* Botão Google */}
+            {/* botao Google */}
             <Pressable style={styles.socialButton}>
             <Text style={styles.googleIcon}>G</Text>
             <Text style={styles.socialButtonText}>Inscreva-se com Google</Text>
