@@ -1,254 +1,274 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+
 import {
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
+import { useState } from "react";
+
+import { authService } from "../src/services/authService";
+
 export default function LoginScreen() {
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const fazerLogin = async () => {
+    // Validação simples
+    if (!email.trim()) {
+      Alert.alert("Atenção", "Informe seu e-mail.");
+      return;
+    }
+
+    if (!senha) {
+      Alert.alert("Atenção", "Informe sua senha.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const credential = await authService.login(email.trim(), senha);
+
+      console.log("Usuário logado:", credential.user.uid);
+
+      console.log("E-mail:", credential.user.email);
+
+      Alert.alert("Sucesso", "Login realizado com sucesso!");
+    } catch (error: any) {
+      console.log("Código:", error.code);
+      console.log("Mensagem:", error.message);
+
+      if (
+        error.code === "auth/invalid-credential" ||
+        error.code === "auth/wrong-password"
+      ) {
+        Alert.alert("Erro", "E-mail ou senha inválidos.");
+      } else if (error.code === "auth/invalid-email") {
+        Alert.alert("Erro", "O e-mail informado é inválido.");
+      } else if (error.code === "auth/too-many-requests") {
+        Alert.alert(
+          "Erro",
+          "Muitas tentativas de login. Tente novamente mais tarde.",
+        );
+      } else {
+        Alert.alert("Erro", "Não foi possível realizar o login.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const router = useRouter();
+
+  const irParaCadastro = () => {
+    router.push("/cadastro");
+  };
+
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+      />
+
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.scrollContent}>
-          
-        <Image source={require("../assets/login/arteCabecalho.png")}style={styles.headerImage}/>
-        
+        className="flex-1 bg-[#FEF8F8]"
+        keyboardShouldPersistTaps="handled"
+      >
+        <Image
+          source={require("../assets/login/arteCabecalho.png")}
+          className="h-[140px] w-full"
+          resizeMode="cover"
+        />
 
-        <View style={styles.content}>
-          
-          
-          
-          <Text style={styles.title}>Bem-vindo(a) de volta!</Text>
-          
-          <Text style={styles.subtitle}> Entre com suas credenciais para acessar sua conta.</Text>
+        <View className="px-6 pt-6 pb-8">
+          <Text className="text-[22px] font-bold text-[#222]">
+            Bem-vindo(a) de volta!
+          </Text>
 
-          <Text style={styles.label}>E-mail</Text>
-          
-          <TextInput style={styles.input} placeholder="Digite seu e-mail" />
+          <Text className="mt-1 mb-5 text-xs text-[#888]">
+            Entre com suas credenciais para acessar sua conta.
+          </Text>
 
-          <Text style={styles.label}>Senha</Text>
+          {/* E-MAIL */}
+
+          <Text className="mt-3.5 mb-1.5 text-xs font-medium text-[#333]">
+            E-mail
+          </Text>
+
           <TextInput
-            style={styles.input}
-            placeholder="Digite sua senha"
-            secureTextEntry
+            value={email}
+            onChangeText={setEmail}
+            className="
+              h-[46px]
+              rounded-xl
+              border
+              border-[#DDD]
+              bg-white
+              px-3.5
+              text-[13px]
+              text-[#222]
+              focus:border-[#8D2857]
+            "
+            placeholder="Digite seu e-mail"
+            placeholderTextColor="#999"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!loading}
           />
 
+          {/* SENHA */}
+
+          <Text className="mt-3.5 mb-1.5 text-xs font-medium text-[#333]">
+            Senha
+          </Text>
+
+          <TextInput
+            value={senha}
+            onChangeText={setSenha}
+            className="
+              h-[46px]
+              rounded-xl
+              border
+              border-[#DDD]
+              bg-white
+              px-3.5
+              text-[13px]
+              text-[#222]
+              focus:border-[#8D2857]
+            "
+            placeholder="Digite sua senha"
+            placeholderTextColor="#999"
+            secureTextEntry
+            editable={!loading}
+            onSubmitEditing={fazerLogin}
+          />
+
+          {/* ESQUECEU SENHA */}
+
           <Pressable>
-            <Text style={styles.forgotPassword}>Esqueceu sua senha?</Text>
+            <Text className="mt-2 self-end text-[11px] font-semibold text-[#E36192]">
+              Esqueceu sua senha?
+            </Text>
           </Pressable>
 
-          <View style={styles.rememberContainer}>
-            <Pressable style={styles.checkbox} />
-            <Text style={styles.rememberText}>Lembrar de mim</Text>
+          {/* LEMBRAR DE MIM */}
+
+          <View className="mt-[18px] flex-row items-center">
+            <Pressable
+              className="
+                h-4
+                w-4
+                rounded-[3px]
+                border
+                border-[#666]
+              "
+            />
+
+            <Text className="ml-[7px] text-[11px] text-[#333]">
+              Lembrar de mim
+            </Text>
           </View>
 
-          <Pressable style={styles.mainButton}>
-            <Text style={styles.mainButtonText}>Login</Text>
+          {/* LOGIN */}
+
+          <Pressable
+            onPress={fazerLogin}
+            disabled={loading}
+            className={`
+              mt-[22px]
+              h-12
+              items-center
+              justify-center
+              rounded-full
+              bg-[#8D2857]
+              active:opacity-80
+              ${loading ? "opacity-60" : ""}
+            `}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <Text className="text-sm font-semibold text-white">Login</Text>
+            )}
           </Pressable>
 
-          <Text style={styles.orText}>Ou</Text>
+          <Text className="my-3.5 text-center text-[11px] text-[#444]">Ou</Text>
 
-          {/* Botão Apple */}
-          <Pressable style={styles.socialButton}>
-            <Text style={styles.socialIcon}></Text>
-            <Text style={styles.socialButtonText}>Inscreva-se com Apple</Text>
+          {/* APPLE */}
+
+          <Pressable
+            className="
+              mb-3
+              h-11
+              flex-row
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-[#DDD]
+              bg-white
+              active:bg-gray-50
+            "
+          >
+            <Text className="mr-2 text-lg text-black"></Text>
+
+            <Text className="text-xs text-[#222]">Inscreva-se com Apple</Text>
           </Pressable>
 
-          {/* Botão Google */}
-          <Pressable style={styles.socialButton}>
-            <Text style={styles.googleIcon}>G</Text>
-            <Text style={styles.socialButtonText}>Inscreva-se com Google</Text>
+          {/* GOOGLE */}
+
+          <Pressable
+            className="
+              mb-3
+              h-11
+              flex-row
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-[#DDD]
+              bg-white
+              active:bg-gray-50
+            "
+          >
+            <Text className="mr-2 text-base font-bold">G</Text>
+
+            <Text className="text-xs text-[#222]">Inscreva-se com Google</Text>
           </Pressable>
 
-          <View style={styles.createAccountContainer}>
-            <Text style={styles.createAccountText}>Não tem uma conta?</Text>
-            <Pressable>
-              <Text style={styles.createAccountLink}>Crie agora</Text>
+          {/* CRIAR CONTA */}
+
+          <View className="mt-1.5 flex-row items-center justify-center">
+            <Text className="text-[11px] text-[#333]">Não tem uma conta?</Text>
+
+            <Pressable onPress={irParaCadastro}>
+              <Text className="ml-1 text-[11px] font-semibold text-[#E36192]">
+                Crie agora
+              </Text>
             </Pressable>
           </View>
 
-          {/* Logo no rodapé - troque pelo caminho da sua logo real*/}
+          {/* LOGO */}
 
-          <Image source={require("../assets/login/logoMapeei.png")}style={styles.logoContainer}resizeMode="contain"/>
-          
-
-      
+          <Image
+            source={require("../assets/login/logoMapeei.png")}
+            className="mt-6 h-[100px] w-[100px] self-center"
+            resizeMode="contain"
+          />
         </View>
       </ScrollView>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  
-  //logo mapeei roda pe
-  logoContainer: {
-    alignSelf: "center",
-    marginTop: 24,
-    width: 100,
-    height:100,
-  },
-    
-  
-  container: {
-    flex: 1,
-    backgroundColor: "#FEF8F8",
-  },
-
-  scrollContent: {
-    paddingBottom: 30,
-  },
-
-  headerImage: {
-    width: "100%",
-    height: 140,
-    resizeMode: "cover",
-  },
-
-  content: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#222",
-  },
-
-  subtitle: {
-    marginTop: 4,
-    marginBottom: 20,
-    fontSize: 12,
-    color: "#888",
-  },
-
-  label: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#333",
-    marginTop: 14,
-    marginBottom: 6,
-  },
-
-  input: {
-    height: 46,
-    borderWidth: 1,
-    borderColor: "#DDD",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    backgroundColor: "#FFF",
-    fontSize: 13,
-  },
-
-  forgotPassword: {
-    alignSelf: "flex-end",
-    marginTop: 8,
-    fontSize: 11,
-    color: "#E36192",
-    fontWeight: "600",
-  },
-
-  rememberContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 18,
-  },
-
-  checkbox: {
-    width: 16,
-    height: 16,
-    borderWidth: 1,
-    borderColor: "#666",
-    borderRadius: 3,
-  },
-
-  rememberText: {
-    marginLeft: 7,
-    fontSize: 11,
-    color: "#333",
-  },
-
-  mainButton: {
-    height: 48,
-    backgroundColor: "#8D2857",
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 22,
-  },
-
-  mainButtonText: {
-    color: "#FFF",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-
-  orText: {
-    textAlign: "center",
-    marginVertical: 14,
-    fontSize: 11,
-    color: "#444",
-  },
-
-  socialButton: {
-    height: 44,
-    borderWidth: 1,
-    borderColor: "#DDD",
-    borderRadius: 22,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFF",
-    marginBottom: 12,
-  },
-
-  socialIcon: {
-    fontSize: 18,
-    marginRight: 8,
-    color: "#000",
-  },
-
-  googleIcon: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginRight: 8,
-  },
-
-  socialButtonText: {
-    fontSize: 12,
-    color: "#222",
-  },
-
-  createAccountContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 6,
-  },
-
-  createAccountText: {
-    fontSize: 11,
-    color: "#333",
-  },
-
-  createAccountLink: {
-    marginLeft: 4,
-    fontSize: 11,
-    color: "#E36192",
-    fontWeight: "600",
-  },
-
-  logo: {
-    width: 90,
-    height: 40,
-    alignSelf: "center",
-    marginTop: 24,
-  },
-});

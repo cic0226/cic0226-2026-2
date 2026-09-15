@@ -1,251 +1,343 @@
-import { Stack } from "expo-router";
+import { authService } from "@/src/services/authService";
+import { Stack, useRouter } from "expo-router";
+import { useState } from "react";
+
 import {
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
-export default function LoginScreen() {
+export default function CadastroScreen() {
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+
+  const [aceitouTermos, setAceitouTermos] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+
+  const criarUsuario = async () => {
+    if (!nome.trim()) {
+      Alert.alert("Atenção", "Informe seu nome.");
+
+      return;
+    }
+
+    if (!email.trim()) {
+      Alert.alert("Atenção", "Informe seu e-mail.");
+
+      return;
+    }
+
+    if (!senha) {
+      Alert.alert("Atenção", "Informe sua senha.");
+
+      return;
+    }
+
+    if (senha.length < 6) {
+      Alert.alert("Atenção", "A senha deve possuir pelo menos 6 caracteres.");
+
+      return;
+    }
+
+    if (!aceitouTermos) {
+      Alert.alert("Atenção", "Você precisa aceitar os termos de uso.");
+
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const usuario = await authService.cadastrar(
+        nome.trim(),
+        email.trim().toLowerCase(),
+        senha,
+      );
+
+      console.log("Usuário cadastrado:", usuario.uid);
+
+      console.log("E-mail:", usuario.email);
+
+      Alert.alert("Sucesso", "Cadastro realizado com sucesso!");
+
+      // router.replace("/");
+    } catch (error: any) {
+      console.log("Código:", error.code);
+
+      console.log("Mensagem:", error.message);
+
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          Alert.alert(
+            "E-mail já cadastrado",
+            "Já existe uma conta utilizando este e-mail.",
+          );
+          break;
+
+        case "auth/invalid-email":
+          Alert.alert(
+            "E-mail inválido",
+            "Informe um endereço de e-mail válido.",
+          );
+          break;
+
+        case "auth/weak-password":
+          Alert.alert("Senha fraca", "Escolha uma senha mais forte.");
+          break;
+
+        case "auth/network-request-failed":
+          Alert.alert(
+            "Sem conexão",
+            "Não foi possível conectar ao servidor. Verifique sua internet.",
+          );
+          break;
+
+        default:
+          Alert.alert("Erro", "Não foi possível realizar o cadastro.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const router = useRouter();
+
+  const irParaLogin = () => {
+    router.push("/login");
+  };
+
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+      />
+
       <ScrollView
-      style={styles.container}
-          contentContainerStyle={styles.scrollContent}>
-            
-          {/*as imagens de cadastro sao as mesmas de login*/}
-          <Image source={require("../assets/login/arteCabecalho.png")}style={styles.headerImage}/>
-        
-          <View style={styles.content}>
-      
-          
-              <Text style={styles.title}>Comece agora com o MaPeei!</Text>
-              
-              <Text style={styles.label}>Nome</Text>
+        className="flex-1 bg-[#FEF8F8]"
+        contentContainerClassName="pb-8"
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Imagem do cabeçalho */}
 
-              <TextInput style={styles.input} placeholder="Digite seu nome" />
+        <Image
+          source={require("../assets/login/arteCabecalho.png")}
+          className="h-[140px] w-full"
+          resizeMode="cover"
+        />
 
-              <Text style={styles.label}>E-mail</Text>
-              
-              <TextInput style={styles.input} placeholder="Digite seu e-mail" />
+        <View className="px-6 pt-6">
+          {/* Título */}
 
-              <Text style={styles.label}>Senha</Text>
+          <Text className="text-[22px] font-bold text-[#222]">
+            Comece agora com o MaPeei!
+          </Text>
 
-              <TextInput style={styles.input}placeholder="Digite sua senha"secureTextEntry/>
+          <Text className="mt-1 mb-5 text-xs text-[#888]">
+            Crie sua conta para começar.
+          </Text>
 
+          <Text className="mt-3.5 mb-1.5 text-xs font-medium text-[#333]">
+            Nome
+          </Text>
 
-              <View style={styles.termsCheckContainer}>
-              <Pressable style={styles.checkbox} />
-              <Text style={styles.rememberText}>Li e concordo com os termos de uso</Text>
-              </View>
+          <TextInput
+            value={nome}
+            onChangeText={setNome}
+            placeholder="Digite seu nome"
+            placeholderTextColor="#999"
+            autoCapitalize="words"
+            autoCorrect={false}
+            editable={!loading}
+            returnKeyType="next"
+            className="
+              h-[46px]
+              rounded-xl
+              border
+              border-[#DDD]
+              bg-white
+              px-3.5
+              text-[13px]
+              text-[#222]
+              focus:border-[#8D2857]
+            "
+          />
 
-              <Pressable style={styles.mainButton}>
-              <Text style={styles.mainButtonText}>Inscrever-se</Text>
-              </Pressable>
+          <Text className="mt-3.5 mb-1.5 text-xs font-medium text-[#333]">
+            E-mail
+          </Text>
 
-              <Text style={styles.orText}>Ou</Text>
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Digite seu e-mail"
+            placeholderTextColor="#999"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!loading}
+            returnKeyType="next"
+            className="
+              h-[46px]
+              rounded-xl
+              border
+              border-[#DDD]
+              bg-white
+              px-3.5
+              text-[13px]
+              text-[#222]
+              focus:border-[#8D2857]
+            "
+          />
 
-              {/* Botão Apple */}
-              <Pressable style={styles.socialButton}>
-              <Text style={styles.socialIcon}></Text>
-              <Text style={styles.socialButtonText}>Inscreva-se com Apple</Text>
-              </Pressable>
+          <Text className="mt-3.5 mb-1.5 text-xs font-medium text-[#333]">
+            Senha
+          </Text>
 
-              {/* Botão Google */}
-              <Pressable style={styles.socialButton}>
-              <Text style={styles.googleIcon}>G</Text>
-              <Text style={styles.socialButtonText}>Inscreva-se com Google</Text>
-              </Pressable>
-              
-              
-              <View style={styles.aredyAccountContainer}>
-                  <Text style={styles.aredyAccountText}>Já possui uma conta?</Text>
-                  
-                  <Pressable>
-                      <Text style={styles.loginLink}>Entre</Text>
-                  </Pressable>
-              </View>
+          <TextInput
+            value={senha}
+            onChangeText={setSenha}
+            placeholder="Digite sua senha"
+            placeholderTextColor="#999"
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!loading}
+            returnKeyType="done"
+            onSubmitEditing={criarUsuario}
+            className="
+              h-[46px]
+              rounded-xl
+              border
+              border-[#DDD]
+              bg-white
+              px-3.5
+              text-[13px]
+              text-[#222]
+              focus:border-[#8D2857]
+            "
+          />
 
+          <Pressable
+            onPress={() => setAceitouTermos((valorAtual) => !valorAtual)}
+            className="mt-[18px] flex-row items-center"
+          >
+            <View
+              className={`
+                h-4
+                w-4
+                items-center
+                justify-center
+                rounded-[3px]
+                border
+                ${
+                  aceitouTermos
+                    ? "border-[#8D2857] bg-[#8D2857]"
+                    : "border-[#666] bg-transparent"
+                }
+              `}
+            >
+              {aceitouTermos && (
+                <Text className="text-[10px] font-bold text-white">✓</Text>
+              )}
+            </View>
+
+            <Text className="ml-[7px] text-[11px] text-[#333]">
+              Li e concordo com os termos de uso
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={criarUsuario}
+            disabled={loading}
+            className={`
+              mt-[22px]
+              h-12
+              items-center
+              justify-center
+              rounded-full
+              bg-[#8D2857]
+              active:opacity-80
+              ${loading ? "opacity-60" : "opacity-100"}
+            `}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text className="text-sm font-semibold text-white">
+                Inscrever-se
+              </Text>
+            )}
+          </Pressable>
+
+          <Text className="my-3.5 text-center text-[11px] text-[#444]">Ou</Text>
+
+          <Pressable
+            className="
+              mb-3
+              h-11
+              flex-row
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-[#DDD]
+              bg-white
+              active:bg-gray-50
+            "
+          >
+            <Text className="mr-2 text-lg text-black"></Text>
+
+            <Text className="text-xs text-[#222]">Inscreva-se com Apple</Text>
+          </Pressable>
+
+          <Pressable
+            className="
+              mb-3
+              h-11
+              flex-row
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-[#DDD]
+              bg-white
+              active:bg-gray-50
+            "
+          >
+            <Text className="mr-2 text-base font-bold text-[#4285F4]">G</Text>
+
+            <Text className="text-xs text-[#222]">Inscreva-se com Google</Text>
+          </Pressable>
+
+          <View className="mt-1.5 flex-row items-center justify-center">
+            <Text className="text-[11px] text-[#333]">
+              Já possui uma conta?
+            </Text>
+
+            <Pressable onPress={irParaLogin}>
+              <Text className="ml-1 text-[11px] font-semibold text-[#E36192]">
+                Entre
+              </Text>
+            </Pressable>
           </View>
-          
-          <Image source={require("../assets/login/logoMapeei.png")}style={styles.logoContainer}resizeMode="contain"/>
 
+          <Image
+            source={require("../assets/login/logoMapeei.png")}
+            className="mt-6 h-[100px] w-[100px] self-center"
+            resizeMode="contain"
+          />
+        </View>
       </ScrollView>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  
-  //logo mapeei roda pe
-  logoContainer: {
-    alignSelf: "center",
-    marginTop: 24,
-    width: 100,
-    height:100,
-  },
-//logo mapeei roda pe
-    
-    
-    
-  
-  container: {
-    flex: 1,
-    backgroundColor: "#FEF8F8",
-  },
-
-  scrollContent: {
-    paddingBottom: 30,
-  },
-
-  headerImage: {
-    width: "100%",
-    height: 140,
-    resizeMode: "cover",
-  },
-
-  content: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#222",
-  },
-
-  subtitle: {
-    marginTop: 4,
-    marginBottom: 20,
-    fontSize: 12,
-    color: "#888",
-  },
-
-  label: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#333",
-    marginTop: 14,
-    marginBottom: 6,
-  },
-
-  input: {
-    height: 46,
-    borderWidth: 1,
-    borderColor: "#DDD",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    backgroundColor: "#FFF",
-    fontSize: 13,
-  },
-
-  forgotPassword: {
-    alignSelf: "flex-end",
-    marginTop: 8,
-    fontSize: 11,
-    color: "#E36192",
-    fontWeight: "600",
-  },
-
-  termsCheckContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 18,
-  },
-
-  checkbox: {
-    width: 16,
-    height: 16,
-    borderWidth: 1,
-    borderColor: "#666",
-    borderRadius: 3,
-  },
-
-  rememberText: {
-    marginLeft: 7,
-    fontSize: 11,
-    color: "#333",
-  },
-
-  mainButton: {
-    height: 48,
-    backgroundColor: "#8D2857",
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 22,
-  },
-
-  mainButtonText: {
-    color: "#FFF",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-
-  orText: {
-    textAlign: "center",
-    marginVertical: 14,
-    fontSize: 11,
-    color: "#444",
-  },
-
-  socialButton: {
-    height: 44,
-    borderWidth: 1,
-    borderColor: "#DDD",
-    borderRadius: 22,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFF",
-    marginBottom: 12,
-  },
-
-  socialIcon: {
-    fontSize: 18,
-    marginRight: 8,
-    color: "#000",
-  },
-
-  googleIcon: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginRight: 8,
-  },
-
-  socialButtonText: {
-    fontSize: 12,
-    color: "#222",
-  },
-
-  aredyAccountContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 6,
-  },
-
-  aredyAccountText: {
-    fontSize: 11,
-    color: "#333",
-  },
-
-  loginLink: {
-    marginLeft: 4,
-    fontSize: 11,
-    color: "#E36192",
-    fontWeight: "600",
-  },
-
-  logo: {
-    width: 90,
-    height: 40,
-    alignSelf: "center",
-    marginTop: 24,
-  },
-});

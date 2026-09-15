@@ -49,7 +49,7 @@ export default function PasseiosScreen() {
           />
 
           {/* BANNER */}
-          <div className="relative ">
+          <View className="relative ">
             <Image
                 source={require("../assets/passeios/hero.png")}
                 resizeMode="cover"
@@ -58,7 +58,7 @@ export default function PasseiosScreen() {
             <Text className="text-[32px] font-extrabold leading-[34px] text-white bottom-0 left-0 absolute mb-6 ml-6 w-44">
               Passeios no DF
             </Text>
-          </div>
+          </View>
           
 
           {/* TÍTULO */}
