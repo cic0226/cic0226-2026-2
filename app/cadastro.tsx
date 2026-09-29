@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 
-export default function CadastroScreen() {
+export default function CadastroScreen(){
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -22,38 +22,34 @@ export default function CadastroScreen() {
 
   const [loading, setLoading] = useState(false);
 
-  const criarUsuario = async () => {
-    if (!nome.trim()) {
+  const criarUsuario = async() =>{
+    if(!nome.trim()){
       Alert.alert("Atenção", "Informe seu nome.");
 
       return;
     }
 
-    if (!email.trim()) {
+    if(!email.trim()){
       Alert.alert("Atenção", "Informe seu e-mail.");
-
       return;
     }
 
-    if (!senha) {
+    if(!senha){
       Alert.alert("Atenção", "Informe sua senha.");
-
       return;
     }
 
-    if (senha.length < 6) {
+    if(senha.length < 6){
       Alert.alert("Atenção", "A senha deve possuir pelo menos 6 caracteres.");
-
       return;
     }
 
-    if (!aceitouTermos) {
+    if(!aceitouTermos){
       Alert.alert("Atenção", "Você precisa aceitar os termos de uso.");
-
       return;
     }
 
-    try {
+    try{
       setLoading(true);
 
       const usuario = await authService.cadastrar(
@@ -69,12 +65,12 @@ export default function CadastroScreen() {
       Alert.alert("Sucesso", "Cadastro realizado com sucesso!");
 
       // router.replace("/");
-    } catch (error: any) {
+    }catch (error: any){
       console.log("Código:", error.code);
 
       console.log("Mensagem:", error.message);
 
-      switch (error.code) {
+      switch(error.code){
         case "auth/email-already-in-use":
           Alert.alert(
             "E-mail já cadastrado",
@@ -103,18 +99,18 @@ export default function CadastroScreen() {
         default:
           Alert.alert("Erro", "Não foi possível realizar o cadastro.");
       }
-    } finally {
+    }finally{
       setLoading(false);
     }
   };
 
   const router = useRouter();
 
-  const irParaLogin = () => {
+  const irParaLogin = () =>{
     router.push("/login");
   };
 
-  return (
+  return(
     <>
       <Stack.Screen
         options={{
@@ -270,9 +266,9 @@ export default function CadastroScreen() {
               ${loading ? "opacity-60" : "opacity-100"}
             `}
           >
-            {loading ? (
+            {loading ?(
               <ActivityIndicator color="#FFFFFF" />
-            ) : (
+            ):(
               <Text className="text-sm font-semibold text-white">
                 Inscrever-se
               </Text>
