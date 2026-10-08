@@ -1,11 +1,11 @@
 import {
-    createUserWithEmailAndPassword,
-    onAuthStateChanged,
-    sendPasswordResetEmail,
-    signInWithEmailAndPassword,
-    signOut,
-    User,
-    UserCredential,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+  User,
+  UserCredential,
 } from "firebase/auth";
 
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
@@ -19,7 +19,7 @@ export interface Usuario {
   criadoEm?: any;
 }
 
-class AuthService {
+export default class AuthService {
   /**
    * Cadastra usuário no Firebase Authentication
    * e cria o documento correspondente no Firestore.
