@@ -1,12 +1,26 @@
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 import { useEffect, useState } from "react";
 
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
+
+import * as ImagePicker from "expo-image-picker";
+
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 import { Ionicons } from "@expo/vector-icons";
 
-import { authService } from "../src/services/authService";
+import { authService } from "../../src/services/authService";
+
+import { auth, db } from "../../src/services/firebase/firebase";
 
 // ============================================================================
 // TIPOS / INTERFACES
@@ -34,15 +48,57 @@ export interface UserProfileProps {
   onOpenFavorites: () => void;
   onNavigate: (route: string) => void;
   onLogout: () => void;
+  isUpdatingAvatar?: boolean; // true enquanto a foto está sendo buscada/salva
 }
 
+// ============================================================================
+// FIRESTORE: campo da foto de perfil (Base64) na collection de usuários
+// ============================================================================
+
+/**
+ * Nome da collection de usuários e do campo que guarda a foto de perfil em
+ * Base64. O Firestore não tem schema fixo: esse campo passa a existir no
+ * documento automaticamente na primeira vez que `salvarAvatarBase64` roda.
+ * Ajuste os valores abaixo se sua collection/campo já tiverem outro nome.
+ */
+const COLECAO_USUARIOS = "usuarios";
+const CAMPO_AVATAR_BASE64 = "avatarBase64";
+
+/** Busca o Base64 da foto de perfil salvo no Firestore para o usuário informado. */
+async function buscarAvatarBase64(uid: string): Promise<string | undefined> {
+  const referencia = doc(db, COLECAO_USUARIOS, uid);
+  const snapshot = await getDoc(referencia);
+
+  if (!snapshot.exists()) return undefined;
+
+  const dados = snapshot.data();
+  const valor = dados[CAMPO_AVATAR_BASE64];
+
+  return typeof valor === "string" ? valor : undefined;
+}
+
+/**
+ * Salva (ou atualiza) o Base64 da foto de perfil no documento do usuário.
+ * Usa `setDoc` com `merge: true` em vez de `updateDoc` para funcionar mesmo
+ * que o campo (ou o documento inteiro) ainda não exista.
+ */
+async function salvarAvatarBase64(
+  uid: string,
+  avatarBase64: string,
+): Promise<void> {
+  const referencia = doc(db, COLECAO_USUARIOS, uid);
+  await setDoc(referencia, { [CAMPO_AVATAR_BASE64]: avatarBase64 }, { merge: true });
+}
+
+// ============================================================================
+// EXIBIÇÃO: valida/normaliza o Base64 lido do Firestore para o <Image>
+// ============================================================================
 
 /**
  * Valida e normaliza uma string de avatar em Base64, devolvendo uma URI
  * pronta para o componente <Image>. Retorna null quando a string estiver
  * vazia ou não parecer um Base64 válido, para acionar o fallback de iniciais.
  */
-
 function getAvatarUri(avatarBase64?: string): string | null {
   if (!avatarBase64) return null;
 
@@ -55,14 +111,12 @@ function getAvatarUri(avatarBase64?: string): string | null {
     return valor;
   }
 
-
   const pareceBase64Valido = /^[A-Za-z0-9+/]+={0,2}$/.test(valor);
 
   if (!pareceBase64Valido) return null;
 
   return `data:image/png;base64,${valor}`;
 }
-
 
 function getInitials(name: string): string {
   const partes = name.trim().split(/\s+/).filter(Boolean);
@@ -75,7 +129,87 @@ function getInitials(name: string): string {
   return (primeira + ultima).toUpperCase();
 }
 
-//icones
+// ============================================================================
+// CAPTURA: escolher/tirar uma foto e converter para Base64 (para armazenar)
+// ============================================================================
+
+/**
+ * Abre a câmera ou a galeria (conforme `fonte`), pede a permissão necessária
+ * e devolve a foto escolhida já em Base64 (com o prefixo "data:image/..."),
+ * pronta para ser enviada ao Firestore. Devolve null se o usuário cancelar
+ * ou negar a permissão.
+ *
+ * Observação sobre tamanho: Base64 aumenta o tamanho do arquivo em ~33% e
+ * o Firestore tem limite de 1MB por documento. Por isso a foto é recortada
+ * em quadrado e comprimida (quality: 0.5). Para fotos ainda maiores,
+ * considere reduzir mais a resolução com `expo-image-manipulator` antes de
+ * gerar o Base64 final.
+ */
+async function escolherImagemComoBase64(
+  fonte: "galeria" | "camera",
+): Promise<string | null> {
+  const permissao =
+    fonte === "galeria"
+      ? await ImagePicker.requestMediaLibraryPermissionsAsync()
+      : await ImagePicker.requestCameraPermissionsAsync();
+
+  if (!permissao.granted) {
+    Alert.alert(
+      "Permissão necessária",
+      fonte === "galeria"
+        ? "Precisamos de acesso à sua galeria para escolher uma foto."
+        : "Precisamos de acesso à câmera para tirar uma foto.",
+    );
+    return null;
+  }
+
+  const opcoes: ImagePicker.ImagePickerOptions = {
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    base64: true,
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 0.5,
+  };
+
+  const resultado =
+    fonte === "galeria"
+      ? await ImagePicker.launchImageLibraryAsync(opcoes)
+      : await ImagePicker.launchCameraAsync(opcoes);
+
+  if (resultado.canceled) return null;
+
+  const asset = resultado.assets[0];
+
+  if (!asset.base64) return null;
+
+  const mime = asset.mimeType ?? "image/jpeg";
+
+  return `data:${mime};base64,${asset.base64}`;
+}
+
+/**
+ * Pergunta ao usuário se a foto vem da câmera ou da galeria, executa a
+ * captura/seleção e devolve o Base64 resultante (ou null se ele cancelar
+ * em qualquer etapa).
+ */
+function escolherFonteEImagem(): Promise<string | null> {
+  return new Promise((resolve) => {
+    Alert.alert("Editar foto de perfil", "Escolha a origem da imagem", [
+      {
+        text: "Câmera",
+        onPress: async () => resolve(await escolherImagemComoBase64("camera")),
+      },
+      {
+        text: "Galeria",
+        onPress: async () =>
+          resolve(await escolherImagemComoBase64("galeria")),
+      },
+      { text: "Cancelar", style: "cancel", onPress: () => resolve(null) },
+    ]);
+  });
+}
+
+// Mapa de ícones disponíveis para os itens de menu
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   bell: "notifications-outline",
   search: "search-outline",
@@ -87,6 +221,10 @@ const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
 };
 
 const ICONE_PADRAO: keyof typeof Ionicons.glyphMap = "ellipse-outline";
+
+// ============================================================================
+// SUBCOMPONENTES
+// ============================================================================
 
 function TituloSecao({ children }: { children: string }) {
   return (
@@ -153,7 +291,9 @@ function ItemMenu({
   );
 }
 
-// recebe tudo via props, conforme UserProfileProps
+// ============================================================================
+// COMPONENTE DE APRESENTAÇÃO (recebe tudo via props, conforme UserProfileProps)
+// ============================================================================
 
 export function UserProfileScreen({
   user,
@@ -161,10 +301,11 @@ export function UserProfileScreen({
   onOpenFavorites,
   onNavigate,
   onLogout,
+  isUpdatingAvatar = false,
 }: UserProfileProps) {
   const [avatarFalhou, setAvatarFalhou] = useState(false);
 
-  //mudanca de foto
+  // mudança de foto: se o Base64 do usuário mudar, damos uma nova chance à imagem
   useEffect(() => {
     setAvatarFalhou(false);
   }, [user.avatarBase64]);
@@ -222,11 +363,12 @@ export function UserProfileScreen({
     },
   ];
 
+
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
+      {/* <Stack.Screen options={{ headerShown: false }} /> */}
 
-      <ScrollView className="flex-1 bg-[#FEF8F8]" contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView className="flex-1 bg-[#FEF8F8]" contentContainerStyle={{ paddingBottom: 110 }}>
         {/* CABECALHO CURVO */}
         <View className="items-center rounded-b-[40px] bg-[#8D2857] px-6 pb-8 pt-14">
           <View className="h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-white/30 bg-[#6E7B3D]">
@@ -241,17 +383,27 @@ export function UserProfileScreen({
             ) : (
               <Text className="text-2xl font-bold text-white">{iniciais}</Text>
             )}
+
+            {isUpdatingAvatar && (
+              <View className="absolute inset-0 items-center justify-center bg-black/40">
+                <ActivityIndicator color="#FFFFFF" />
+              </View>
+            )}
           </View>
 
           <Text className="mt-3 text-lg font-bold text-white">{user.name}</Text>
 
           <Text className="mt-0.5 text-xs text-white/70">@{user.username}</Text>
 
+          {/* Ao tocar, abre a câmera/galeria e salva a nova foto no Firestore */}
           <Pressable
             onPress={onEditProfile}
+            disabled={isUpdatingAvatar}
             accessibilityRole="button"
-            accessibilityLabel="Editar perfil"
-            className="mt-4 rounded-full bg-[#6B1E42] px-5 py-2 active:opacity-80"
+            accessibilityLabel="Editar perfil: alterar foto"
+            className={`mt-4 rounded-full bg-[#6B1E42] px-5 py-2 active:opacity-80 ${
+              isUpdatingAvatar ? "opacity-60" : ""
+            }`}
           >
             <Text className="text-xs font-semibold text-white">Editar perfil</Text>
           </Pressable>
@@ -322,23 +474,82 @@ export function UserProfileScreen({
   );
 }
 
-// trocar `usuarioExemplo` pela leitura do usuário autenticado (Firebase)
-// assim que o serviço correspondente estiver disponível.
+// ============================================================================
+// TELA (rota "usuario"): conecta o componente de apresentação acima aos
+// dados reais e à navegação do app.
+// ============================================================================
 
-const usuarioExemplo: UserProfileData = {
+// Placeholder para nome/username/favoritos enquanto essa parte não vem do
+// Firebase. O avatarBase64 abaixo É sobrescrito pelo valor real do
+// Firestore assim que a tela carrega (useEffect em UsuarioScreen).
+const usuarioPlaceholder: UserProfileData = {
   id: "0",
-  name: "Maria Rodrigues",
-  username: "mariarodrigues_bsb",
+  name: "unamed",
+  username: "unamed",
   avatarBase64: undefined,
-  favoritesCount: 2,
+  favoritesCount: 0,
 };
-
 
 export default function UsuarioScreen() {
   const router = useRouter();
 
-  const handleEditProfile = () => {
-    //router.push("/editar-perfil");
+  const [usuario, setUsuario] = useState<UserProfileData>(usuarioPlaceholder);
+  const [isUpdatingAvatar, setIsUpdatingAvatar] = useState(false);
+
+  // Busca o avatar salvo no Firestore assim que a tela carrega
+  useEffect(() => {
+    const uid = auth.currentUser?.uid;
+
+    if (!uid) return;
+
+    setIsUpdatingAvatar(true);
+
+    buscarAvatarBase64(uid)
+      .then((avatarBase64) => {
+        setUsuario((atual) => ({ ...atual, id: uid, avatarBase64 }));
+      })
+      .catch((error) => {
+        console.log("Erro ao buscar foto de perfil:", error);
+      })
+      .finally(() => {
+        setIsUpdatingAvatar(false);
+      });
+  }, []);
+
+  // Clique em "Editar perfil": abre câmera/galeria, converte para Base64 e
+  // salva no Firestore (collection "usuarios", campo "avatarBase64").
+  const handleEditProfile = async () => {
+    const uid = auth.currentUser?.uid;
+
+    if (!uid) {
+      Alert.alert(
+        "Sessão expirada",
+        "Faça login novamente para editar sua foto de perfil.",
+      );
+      return;
+    }
+
+    setIsUpdatingAvatar(true);
+
+    try {
+      const novoAvatarBase64 = await escolherFonteEImagem();
+
+      if (!novoAvatarBase64) return; // usuário cancelou a seleção
+
+      // Atualiza a tela imediatamente...
+      setUsuario((atual) => ({ ...atual, avatarBase64: novoAvatarBase64 }));
+
+      // ...e persiste no Firestore
+      await salvarAvatarBase64(uid, novoAvatarBase64);
+    } catch (error) {
+      console.log("Erro ao atualizar foto de perfil:", error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível salvar a nova foto. Tente novamente.",
+      );
+    } finally {
+      setIsUpdatingAvatar(false);
+    }
   };
 
   const handleOpenFavorites = () => {
@@ -361,11 +572,12 @@ export default function UsuarioScreen() {
 
   return (
     <UserProfileScreen
-      user={usuarioExemplo}
+      user={usuario}
       onEditProfile={handleEditProfile}
       onOpenFavorites={handleOpenFavorites}
       onNavigate={handleNavigate}
       onLogout={handleLogout}
+      isUpdatingAvatar={isUpdatingAvatar}
     />
   );
 }

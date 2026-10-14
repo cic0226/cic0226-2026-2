@@ -43,7 +43,7 @@ export default function LoginScreen() {
       console.log("E-mail:", credential.user.email);
 
       Alert.alert("Sucesso", "Login realizado com sucesso!");
-      router.push("/passeios");
+      //router.replace("/(tabs)");
     } catch (error: any) {
       console.log("Código:", error.code);
       console.log("Mensagem:", error.message);

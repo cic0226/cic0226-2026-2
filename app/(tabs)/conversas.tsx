@@ -11,7 +11,7 @@ import {
     View,
 } from "react-native";
 
-import { authService, type Usuario } from "../src/services/authService";
+import { authService, type Usuario } from "../../src/services/authService";
 
 // ============================================================================
 // TIPOS / INTERFACES
