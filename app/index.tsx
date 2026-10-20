@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream:app/index.tsx
 import { Redirect, Stack, useLocalSearchParams, useRouter } from "expo-router";
 
 import {
@@ -105,18 +106,56 @@ export default function LoginScreen() {
     return <Redirect href="/passeios" />;
   }
 
+=======
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import { AuthShell, Button, ErrorNotice, Field } from '@/components/ui';
+import { useAction } from '@/hooks/useAction';
+import { authService } from '@/services/authService';
+import { colors, ui } from '@/theme/theme';
+export default function LoginScreen() {
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const action = useAction();
+  const submit = () => {
+    void action.run(() => authService.login(email, senha));
+  };
+>>>>>>> Stashed changes:app/(auth)/login.tsx
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
+    <AuthShell
+      title="Bem-vindo(a) de volta!"
+      subtitle="Entre com suas credenciais para acessar sua conta."
+    >
+      <Field
+        label="E-mail"
+        placeholder="Digite seu e-mail"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="email-address"
+        autoComplete="email"
+        editable={!action.busy}
       />
-
-      <ScrollView
-        className="flex-1 bg-[#FEF8F8]"
-        keyboardShouldPersistTaps="handled"
+      <Field
+        label="Senha"
+        placeholder="Digite sua senha"
+        value={senha}
+        onChangeText={setSenha}
+        password
+        autoCapitalize="none"
+        autoComplete="current-password"
+        editable={!action.busy}
+        onSubmitEditing={submit}
+        returnKeyType="go"
+      />
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push('/recuperar-senha')}
+        style={{ alignSelf: 'flex-end', minHeight: 40, justifyContent: 'center' }}
       >
+<<<<<<< Updated upstream:app/index.tsx
         <Image
           source={require("../assets/login/arteCabecalho.png")}
           className="h-[140px] w-full"
@@ -319,5 +358,27 @@ export default function LoginScreen() {
         </View>
       </ScrollView>
     </>
+=======
+        <Text style={{ color: colors.pink, fontWeight: '600', fontSize: 13 }}>
+          Esqueceu sua senha?
+        </Text>
+      </Pressable>
+      <ErrorNotice message={action.error} />
+      <Button title="Entrar" onPress={submit} busy={action.busy} />
+      <Text style={[ui.caption, { textAlign: 'center' }]}>
+        Sua sessão permanece conectada até você sair.
+      </Text>
+      <View style={[ui.row, { justifyContent: 'center', flexWrap: 'wrap' }]}>
+        <Text style={ui.muted}>Ainda não tem uma conta?</Text>
+        <Pressable
+          onPress={() => router.push('/cadastro')}
+          accessibilityRole="button"
+          style={{ paddingVertical: 10 }}
+        >
+          <Text style={{ color: colors.brand, fontWeight: '700' }}>Cadastre-se</Text>
+        </Pressable>
+      </View>
+    </AuthShell>
+>>>>>>> Stashed changes:app/(auth)/login.tsx
   );
 }
