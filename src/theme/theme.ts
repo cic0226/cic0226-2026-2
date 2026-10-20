@@ -1,0 +1,40 @@
+import { StyleSheet } from 'react-native';
+export const colors = {
+  background: '#FEF8F8',
+  surface: '#FFFFFF',
+  brand: '#8D2857',
+  brandDark: '#6B1E42',
+  pink: '#E36192',
+  olive: '#7B8E10',
+  text: '#29232A',
+  muted: '#82777D',
+  border: '#E8DFE3',
+  soft: '#F7E9EF',
+  oliveSoft: '#F0F3DE',
+  danger: '#B52D46',
+};
+export const ui = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  between: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  grow: { flex: 1 },
+  title: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: colors.text,
+    letterSpacing: -0.7,
+    lineHeight: 34,
+  },
+  heading: { fontSize: 21, fontWeight: '700', color: colors.text, letterSpacing: -0.4 },
+  body: { fontSize: 15, color: colors.text, lineHeight: 23 },
+  muted: { fontSize: 13, color: colors.muted, lineHeight: 20 },
+  caption: { fontSize: 11, color: colors.muted, lineHeight: 16 },
+  card: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 22,
+    padding: 18,
+  },
+  content: { paddingHorizontal: 22, paddingBottom: 120, gap: 20 },
+  section: { gap: 12 },
+});

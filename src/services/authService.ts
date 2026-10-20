@@ -1,11 +1,12 @@
 import {
-    createUserWithEmailAndPassword,
-    onAuthStateChanged,
-    sendPasswordResetEmail,
-    signInWithEmailAndPassword,
-    signOut,
-    User,
-    UserCredential,
+  createUserWithEmailAndPassword,
+<<<<<<< Updated upstream
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+  User,
+  UserCredential,
 } from "firebase/auth";
 
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
@@ -19,7 +20,7 @@ export interface Usuario {
   criadoEm?: any;
 }
 
-class AuthService {
+export default class AuthService {
   /**
    * Cadastra usuário no Firebase Authentication
    * e cria o documento correspondente no Firestore.
@@ -127,3 +128,35 @@ class AuthService {
 }
 
 export const authService = new AuthService();
+=======
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+} from 'firebase/auth';
+import { auth } from './firebase/auth';
+import { profileService } from './profileService';
+import { validarEmail, validarSenha, textoObrigatorio, LIMITES } from '@/utils/validation';
+
+export const authService = {
+  async cadastrar(nomeInput: string, emailInput: string, senha: string) {
+    const nome = textoObrigatorio(nomeInput, 'Nome', LIMITES.nome, 2);
+    const email = validarEmail(emailInput);
+    validarSenha(senha);
+    const result = await createUserWithEmailAndPassword(auth, email, senha);
+    await updateProfile(result.user, { displayName: nome });
+    await profileService.salvar({ nome, fotoBase64: null, regiao: '' });
+    return result.user;
+  },
+  login(email: string, senha: string) {
+    if (!senha) throw new Error('Informe sua senha.');
+    return signInWithEmailAndPassword(auth, validarEmail(email), senha);
+  },
+  recuperarSenha(email: string) {
+    return sendPasswordResetEmail(auth, validarEmail(email));
+  },
+  logout() {
+    return signOut(auth);
+  },
+};
+>>>>>>> Stashed changes
